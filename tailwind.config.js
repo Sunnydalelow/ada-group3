@@ -8,16 +8,19 @@ export default {
     extend: {
       colors: {
         ada: {
-          red: '#CC092F',
-          blue: '#0176D3',
-          navy: '#032D60',
-          light: '#F4F7FB',
-          gray: '#6B7280',
-          border: '#DDE3EE',
+          red: '#CC092F',        // Primary brand red
+          blue: '#0070D2',       // Salesforce/help blue
+          navy: '#003B71',       // Deep blue for hero backgrounds
+          teal: '#00A1B7',       // ADA accent teal
+          light: '#F3F3F3',      // Light gray background
+          gray: '#54698D',       // Medium gray for text
+          border: '#DDDBDA',     // Border color
+          darkgray: '#3E3E3C',   // Dark text
         },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ['Open Sans', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
+        heading: ['Roboto', 'Open Sans', 'sans-serif'],
       },
       maxWidth: {
         'container': '1200px',
