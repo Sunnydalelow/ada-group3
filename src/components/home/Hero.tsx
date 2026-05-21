@@ -1,22 +1,23 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuthStore } from '@store/authStore';
-import { unauthFlow, authFlow } from '@data/chatFlows';
+import { unauthPaths, authPaths, ConversationPath } from '@data/chatFlows';
 
 interface Message {
   text: string;
   sender: 'user' | 'agent';
+  quickReplies?: string[];
 }
 
 export default function Hero() {
   const { isAuthenticated, user } = useAuthStore();
-  const [searchQuery, setSearchQuery] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const [activePath, setActivePath] = useState<ConversationPath | null>(null);
+  const [stepIndex, setStepIndex] = useState(0);
   const heroRef = useRef<HTMLElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const flow = isAuthenticated ? authFlow : unauthFlow;
-  const conversationStarters = flow[0]?.suggestions || [];
+  const paths = isAuthenticated ? authPaths : unauthPaths;
 
   useEffect(() => {
     const el = heroRef.current;
@@ -32,60 +33,77 @@ export default function Hero() {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isLoading]);
+  }, [messages, isTyping]);
 
-  const sendToApi = async (text: string) => {
-    const userMessage: Message = { text, sender: 'user' };
-    setMessages((prev) => [...prev, userMessage]);
-    setIsLoading(true);
+  const startConversation = (path: ConversationPath) => {
+    setActivePath(path);
+    setStepIndex(0);
+    playStep(path, 0);
+  };
 
-    try {
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text }),
-      });
+  const playStep = (path: ConversationPath, idx: number) => {
+    const step = path.steps[idx];
+    if (!step) return;
 
-      const data = await res.json();
-      const agentText = res.ok ? data.text : 'I apologize, I had trouble processing that.';
-      setMessages((prev) => [...prev, { text: agentText, sender: 'agent' }]);
-    } catch (error) {
-      console.error('Chat error:', error);
-      setMessages((prev) => [...prev, { text: 'Unable to connect to the assistant. Please try again.', sender: 'agent' }]);
-    } finally {
-      setIsLoading(false);
+    setMessages((prev) => [...prev, { text: step.user, sender: 'user' }]);
+    setIsTyping(true);
+
+    setTimeout(() => {
+      setIsTyping(false);
+      setMessages((prev) => [
+        ...prev,
+        { text: step.agent, sender: 'agent', quickReplies: step.quickReplies },
+      ]);
+      setStepIndex(idx + 1);
+    }, 1000 + Math.random() * 500);
+  };
+
+  const handleQuickReply = (reply: string) => {
+    if (activePath && stepIndex < activePath.steps.length) {
+      setMessages((prev) => prev.map((m) => ({ ...m, quickReplies: undefined })));
+      playStep(activePath, stepIndex);
+    } else {
+      setMessages((prev) => [
+        ...prev.map((m) => ({ ...m, quickReplies: undefined })),
+        { text: reply, sender: 'user' as const },
+      ]);
+      setIsTyping(true);
+      setTimeout(() => {
+        setIsTyping(false);
+        setMessages((prev) => [
+          ...prev,
+          {
+            text: "Thank you for your interest! To continue this conversation or access more personalized features, please sign in or contact us at 1-800-DIABETES.",
+            sender: 'agent',
+          },
+        ]);
+      }, 1000);
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!searchQuery.trim() || isLoading) return;
-    const text = searchQuery;
-    setSearchQuery('');
-    sendToApi(text);
-  };
-
-  const handleStarterClick = (starter: string) => {
-    sendToApi(starter);
+  const handleReset = () => {
+    setMessages([]);
+    setActivePath(null);
+    setStepIndex(0);
   };
 
   return (
     <section ref={heroRef} className="relative min-h-[90vh] flex items-center overflow-hidden">
-      {/* Big hero background image */}
+      {/* Background image */}
       <div className="absolute inset-0">
         <img
           src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=1920&h=1080&fit=crop"
           alt=""
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/60 to-black/40" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/65 to-black/40" />
       </div>
 
-      {/* Dotted glow pattern */}
+      {/* Dotted glow */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.12) 1px, transparent 1px)',
+          backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px)',
           backgroundSize: '28px 28px',
         }}
       />
@@ -110,90 +128,82 @@ export default function Hero() {
             Your trusted source for diabetes information, support, and community.
           </p>
 
-          {/* Chat area */}
+          {/* Chat panel — one single box that expands */}
           <div className="max-w-2xl">
-            {/* Conversation thread (expands when messages exist) */}
-            {messages.length > 0 && (
-              <div className="bg-white/95 backdrop-blur-md rounded-2xl p-5 mb-4 max-h-[400px] overflow-y-auto shadow-xl border border-white/20">
-                <div className="space-y-3">
+            <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
+              {/* Messages area */}
+              {messages.length > 0 && (
+                <div className="max-h-[380px] overflow-y-auto p-5 space-y-3 border-b border-gray-100">
                   {messages.map((msg, idx) => (
-                    <div key={idx} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 ${
-                        msg.sender === 'user'
-                          ? 'bg-gradient-to-r from-ada-red to-ada-red-bright text-white rounded-br-md'
-                          : 'bg-gray-100 text-ada-dark-gray rounded-bl-md'
-                      }`}>
-                        <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.text}</p>
+                    <div key={idx}>
+                      <div className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                        <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 ${
+                          msg.sender === 'user'
+                            ? 'bg-gradient-to-r from-ada-red to-ada-red-bright text-white rounded-br-md'
+                            : 'bg-gray-100 text-ada-dark-gray rounded-bl-md'
+                        }`}>
+                          <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.text}</p>
+                        </div>
                       </div>
+                      {msg.quickReplies && (
+                        <div className="flex flex-wrap gap-1.5 mt-2 ml-1">
+                          {msg.quickReplies.map((reply) => (
+                            <button
+                              key={reply}
+                              onClick={() => handleQuickReply(reply)}
+                              className="px-3 py-1.5 text-xs font-medium text-ada-red bg-ada-red/5 border border-ada-red/20 rounded-full hover:bg-ada-red/10 hover:border-ada-red/40 transition-all"
+                            >
+                              {reply}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   ))}
-                  {isLoading && (
+                  {isTyping && (
                     <div className="flex justify-start">
                       <div className="bg-gray-100 rounded-2xl rounded-bl-md px-4 py-3">
                         <div className="flex items-center gap-1.5">
-                          <div className="w-2 h-2 bg-ada-red/60 rounded-full animate-bounce" />
-                          <div className="w-2 h-2 bg-ada-red/60 rounded-full animate-bounce [animation-delay:0.1s]" />
-                          <div className="w-2 h-2 bg-ada-red/60 rounded-full animate-bounce [animation-delay:0.2s]" />
+                          <div className="w-2 h-2 bg-ada-muted-gray rounded-full animate-bounce" />
+                          <div className="w-2 h-2 bg-ada-muted-gray rounded-full animate-bounce [animation-delay:0.15s]" />
+                          <div className="w-2 h-2 bg-ada-muted-gray rounded-full animate-bounce [animation-delay:0.3s]" />
                         </div>
                       </div>
                     </div>
                   )}
                   <div ref={messagesEndRef} />
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Input */}
-            <form onSubmit={handleSubmit}>
-              <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-white/20">
-                <div className="flex items-center px-5 py-4">
-                  <svg className="w-5 h-5 text-ada-muted-gray flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                  </svg>
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Ask me anything about diabetes..."
-                    disabled={isLoading}
-                    className="flex-1 px-3 text-base md:text-lg text-ada-dark-gray placeholder-ada-muted-gray focus:outline-none bg-transparent disabled:opacity-50"
-                  />
+              {/* Bottom area: starters OR restart */}
+              <div className="p-4">
+                {messages.length === 0 ? (
+                  <>
+                    <p className="text-sm text-ada-muted-gray mb-3">
+                      {isAuthenticated ? 'What can I help you with today?' : 'Welcome to the American Diabetes Association. What can I help you with?'}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {paths.map((path) => (
+                        <button
+                          key={path.starter}
+                          onClick={() => startConversation(path)}
+                          className="px-4 py-2 text-sm font-medium text-ada-red bg-ada-red/5 border border-ada-red/20 rounded-xl hover:bg-ada-red hover:text-white hover:border-ada-red transition-all"
+                        >
+                          {path.starter}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                ) : (
                   <button
-                    type="submit"
-                    disabled={isLoading || !searchQuery.trim()}
-                    className="flex-shrink-0 w-10 h-10 bg-gradient-to-r from-ada-red to-ada-red-bright text-white rounded-xl flex items-center justify-center hover:shadow-lg hover:shadow-ada-red/30 transition-all disabled:opacity-50"
-                    aria-label="Send"
+                    onClick={handleReset}
+                    className="w-full py-2.5 text-sm font-medium text-ada-muted-gray hover:text-ada-red transition-colors"
                   >
-                    {isLoading ? (
-                      <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                      </svg>
-                    ) : (
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                      </svg>
-                    )}
+                    ← Start a new conversation
                   </button>
-                </div>
+                )}
               </div>
-            </form>
-
-            {/* Conversation starters — hidden once conversation starts */}
-            {messages.length === 0 && (
-              <div className="flex flex-wrap gap-2.5 mt-5">
-                {conversationStarters.map((starter) => (
-                  <button
-                    key={starter}
-                    onClick={() => handleStarterClick(starter)}
-                    disabled={isLoading}
-                    className="px-5 py-2.5 bg-white/10 backdrop-blur-sm border border-white/25 rounded-xl text-white text-sm font-medium hover:bg-white hover:text-ada-red hover:border-white transition-all duration-200 disabled:opacity-50"
-                  >
-                    {starter}
-                  </button>
-                ))}
-              </div>
-            )}
+            </div>
           </div>
         </div>
       </div>
