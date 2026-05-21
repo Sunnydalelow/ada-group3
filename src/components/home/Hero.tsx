@@ -17,7 +17,7 @@ export default function Hero() {
   const [activePath, setActivePath] = useState<ConversationPath | null>(null);
   const [stepIndex, setStepIndex] = useState(0);
   const heroRef = useRef<HTMLElement>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const paths = isAuthenticated ? authPaths : unauthPaths;
 
@@ -34,7 +34,8 @@ export default function Hero() {
   }, []);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const el = scrollContainerRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
   }, [messages, isTyping]);
 
   const startConversation = (path: ConversationPath) => {
@@ -156,7 +157,7 @@ export default function Hero() {
           <div className="max-w-2xl">
             <div className="bg-white rounded-2xl shadow-2xl flex flex-col h-[420px]">
               {/* Messages area — always present, scrolls */}
-              <div className="flex-1 overflow-y-auto p-5 space-y-3 min-h-0">
+              <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-5 space-y-3 min-h-0">
                 {messages.length === 0 ? (
                   <div>
                     <p className="text-sm text-ada-muted-gray mb-4">
@@ -217,7 +218,6 @@ export default function Hero() {
                         </div>
                       </div>
                     )}
-                    <div ref={messagesEndRef} />
                   </>
                 )}
               </div>

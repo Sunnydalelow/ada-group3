@@ -73,7 +73,7 @@ export const authPaths: ConversationPath[] = [
     steps: [
       {
         user: "Can you show me my health summary?",
-        agent: "Here's your quick health summary:\n\n📊 Last blood sugar: 127 mg/dL (in range)\n🎯 A1C trend: improving (6.8%)\n💊 Medications: on track\n\nEverything looks good! Your 7-day average is 125 mg/dL which shows really consistent management. Would you like to log a new reading or see your weekly trend?",
+        agent: "Here's your quick health summary:\n\n- **Last blood sugar:** 127 mg/dL (in range)\n- **A1C trend:** improving (6.8%)\n- **Medications:** on track\n\nEverything looks good. Your 7-day average is 125 mg/dL which shows really consistent management. Would you like to log a new reading or see your weekly trend?",
         quickReplies: ["Log a new reading", "Show my weekly trend", "Medication reminders"],
       },
     ],
