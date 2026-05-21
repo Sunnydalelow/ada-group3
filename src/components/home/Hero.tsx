@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuthStore } from '@store/authStore';
 import { unauthPaths, authPaths, ConversationPath } from '@data/chatFlows';
+import FormattedText from '@components/common/FormattedText';
 
 interface Message {
   text: string;
@@ -11,6 +12,7 @@ interface Message {
 export default function Hero() {
   const { isAuthenticated, user } = useAuthStore();
   const [messages, setMessages] = useState<Message[]>([]);
+  const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [activePath, setActivePath] = useState<ConversationPath | null>(null);
   const [stepIndex, setStepIndex] = useState(0);
@@ -59,26 +61,48 @@ export default function Hero() {
   };
 
   const handleQuickReply = (reply: string) => {
+    setMessages((prev) => prev.map((m) => ({ ...m, quickReplies: undefined })));
     if (activePath && stepIndex < activePath.steps.length) {
+      playStep(activePath, stepIndex);
+    } else {
+      sendFreeText(reply);
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inputValue.trim() || isTyping) return;
+    const text = inputValue.trim();
+    setInputValue('');
+
+    const matchedPath = paths.find(
+      (p) => p.starter.toLowerCase() === text.toLowerCase() ||
+        p.steps[0]?.user.toLowerCase().includes(text.toLowerCase())
+    );
+
+    if (matchedPath && messages.length === 0) {
+      startConversation(matchedPath);
+    } else if (activePath && stepIndex < activePath.steps.length) {
       setMessages((prev) => prev.map((m) => ({ ...m, quickReplies: undefined })));
       playStep(activePath, stepIndex);
     } else {
-      setMessages((prev) => [
-        ...prev.map((m) => ({ ...m, quickReplies: undefined })),
-        { text: reply, sender: 'user' as const },
-      ]);
-      setIsTyping(true);
-      setTimeout(() => {
-        setIsTyping(false);
-        setMessages((prev) => [
-          ...prev,
-          {
-            text: "Thank you for your interest! To continue this conversation or access more personalized features, please sign in or contact us at 1-800-DIABETES.",
-            sender: 'agent',
-          },
-        ]);
-      }, 1000);
+      sendFreeText(text);
     }
+  };
+
+  const sendFreeText = (text: string) => {
+    setMessages((prev) => [...prev, { text, sender: 'user' }]);
+    setIsTyping(true);
+    setTimeout(() => {
+      setIsTyping(false);
+      setMessages((prev) => [
+        ...prev,
+        {
+          text: "Thank you for your question! For personalized assistance, please call us at 1-800-DIABETES or sign in to access our full support features.",
+          sender: 'agent',
+        },
+      ]);
+    }, 1000);
   };
 
   const handleReset = () => {
@@ -88,7 +112,7 @@ export default function Hero() {
   };
 
   return (
-    <section ref={heroRef} className="relative min-h-[90vh] flex items-center overflow-hidden">
+    <section ref={heroRef} className="relative min-h-[90vh] flex items-start overflow-hidden">
       {/* Background image */}
       <div className="absolute inset-0">
         <img
@@ -114,72 +138,28 @@ export default function Hero() {
         }}
       />
 
-      {/* Content */}
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-20 md:py-28">
+      {/* Content — pinned to top with fixed padding, no centering */}
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-16 pb-20 md:pt-24 md:pb-28">
         <div className="max-w-3xl">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-5 text-white">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-4 text-white">
             {isAuthenticated && user ? (
               <>Welcome back, {user.name.split(' ')[0]}.</>
             ) : (
               <>How can we help?</>
             )}
           </h1>
-          <p className="text-lg md:text-xl text-white/90 mb-10 max-w-xl leading-relaxed">
+          <p className="text-lg md:text-xl text-white/90 mb-8 max-w-xl leading-relaxed">
             Your trusted source for diabetes information, support, and community.
           </p>
 
-          {/* Chat panel — one single box that expands */}
+          {/* Chat panel — fixed structure, scrolls internally */}
           <div className="max-w-2xl">
-            <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
-              {/* Messages area */}
-              {messages.length > 0 && (
-                <div className="max-h-[380px] overflow-y-auto p-5 space-y-3 border-b border-gray-100">
-                  {messages.map((msg, idx) => (
-                    <div key={idx}>
-                      <div className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 ${
-                          msg.sender === 'user'
-                            ? 'bg-gradient-to-r from-ada-red to-ada-red-bright text-white rounded-br-md'
-                            : 'bg-gray-100 text-ada-dark-gray rounded-bl-md'
-                        }`}>
-                          <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.text}</p>
-                        </div>
-                      </div>
-                      {msg.quickReplies && (
-                        <div className="flex flex-wrap gap-1.5 mt-2 ml-1">
-                          {msg.quickReplies.map((reply) => (
-                            <button
-                              key={reply}
-                              onClick={() => handleQuickReply(reply)}
-                              className="px-3 py-1.5 text-xs font-medium text-ada-red bg-ada-red/5 border border-ada-red/20 rounded-full hover:bg-ada-red/10 hover:border-ada-red/40 transition-all"
-                            >
-                              {reply}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                  {isTyping && (
-                    <div className="flex justify-start">
-                      <div className="bg-gray-100 rounded-2xl rounded-bl-md px-4 py-3">
-                        <div className="flex items-center gap-1.5">
-                          <div className="w-2 h-2 bg-ada-muted-gray rounded-full animate-bounce" />
-                          <div className="w-2 h-2 bg-ada-muted-gray rounded-full animate-bounce [animation-delay:0.15s]" />
-                          <div className="w-2 h-2 bg-ada-muted-gray rounded-full animate-bounce [animation-delay:0.3s]" />
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  <div ref={messagesEndRef} />
-                </div>
-              )}
-
-              {/* Bottom area: starters OR restart */}
-              <div className="p-4">
+            <div className="bg-white rounded-2xl shadow-2xl flex flex-col h-[420px]">
+              {/* Messages area — always present, scrolls */}
+              <div className="flex-1 overflow-y-auto p-5 space-y-3 min-h-0">
                 {messages.length === 0 ? (
-                  <>
-                    <p className="text-sm text-ada-muted-gray mb-3">
+                  <div>
+                    <p className="text-sm text-ada-muted-gray mb-4">
                       {isAuthenticated ? 'What can I help you with today?' : 'Welcome to the American Diabetes Association. What can I help you with?'}
                     </p>
                     <div className="flex flex-wrap gap-2">
@@ -193,13 +173,83 @@ export default function Hero() {
                         </button>
                       ))}
                     </div>
-                  </>
+                  </div>
                 ) : (
+                  <>
+                    {messages.map((msg, idx) => (
+                      <div key={idx}>
+                        <div className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                          <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 ${
+                            msg.sender === 'user'
+                              ? 'bg-gradient-to-r from-ada-red to-ada-red-bright text-white rounded-br-md'
+                              : 'bg-gray-100 text-ada-dark-gray rounded-bl-md'
+                          }`}>
+                            {msg.sender === 'agent' ? (
+                              <FormattedText text={msg.text} />
+                            ) : (
+                              <p className="text-sm leading-relaxed">{msg.text}</p>
+                            )}
+                          </div>
+                        </div>
+                        {msg.quickReplies && (
+                          <div className="flex flex-wrap gap-1.5 mt-2 ml-1">
+                            {msg.quickReplies.map((reply) => (
+                              <button
+                                key={reply}
+                                onClick={() => handleQuickReply(reply)}
+                                className="px-3 py-1.5 text-xs font-medium text-ada-red bg-ada-red/5 border border-ada-red/20 rounded-full hover:bg-ada-red/10 hover:border-ada-red/40 transition-all"
+                              >
+                                {reply}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    {isTyping && (
+                      <div className="flex justify-start">
+                        <div className="bg-gray-100 rounded-2xl rounded-bl-md px-4 py-3">
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-2 h-2 bg-ada-muted-gray rounded-full animate-bounce" />
+                            <div className="w-2 h-2 bg-ada-muted-gray rounded-full animate-bounce [animation-delay:0.15s]" />
+                            <div className="w-2 h-2 bg-ada-muted-gray rounded-full animate-bounce [animation-delay:0.3s]" />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    <div ref={messagesEndRef} />
+                  </>
+                )}
+              </div>
+
+              {/* Input bar — always at the bottom */}
+              <div className="border-t border-gray-100 p-3 flex-shrink-0">
+                <form onSubmit={handleSubmit} className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    placeholder="Type your question..."
+                    disabled={isTyping}
+                    className="flex-1 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-ada-red/20 focus:border-ada-red/30 transition-all disabled:opacity-50"
+                  />
+                  <button
+                    type="submit"
+                    disabled={isTyping || !inputValue.trim()}
+                    className="w-10 h-10 bg-gradient-to-r from-ada-red to-ada-red-bright text-white rounded-xl flex items-center justify-center hover:shadow-md hover:shadow-ada-red/20 transition-all disabled:opacity-50 flex-shrink-0"
+                    aria-label="Send"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                  </button>
+                </form>
+                {messages.length > 0 && (
                   <button
                     onClick={handleReset}
-                    className="w-full py-2.5 text-sm font-medium text-ada-muted-gray hover:text-ada-red transition-colors"
+                    className="w-full mt-2 py-1.5 text-xs font-medium text-ada-muted-gray hover:text-ada-red transition-colors"
                   >
-                    ← Start a new conversation
+                    ← Start over
                   </button>
                 )}
               </div>
