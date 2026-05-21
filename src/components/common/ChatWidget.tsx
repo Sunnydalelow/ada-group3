@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuthStore } from '@store/authStore';
+import { useChatStore } from '@store/chatStore';
 import { unauthFlow, authFlow } from '@data/chatFlows';
 
 interface Message {
@@ -16,6 +17,7 @@ export default function ChatWidget() {
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { isAuthenticated, user } = useAuthStore();
+  const { triggerMessage, clearTrigger } = useChatStore();
 
   const flow = isAuthenticated ? authFlow : unauthFlow;
 
@@ -28,6 +30,21 @@ export default function ChatWidget() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
+
+  useEffect(() => {
+    if (triggerMessage) {
+      setIsOpen(true);
+      if (messages.length === 0) {
+        simulateAgentMessage(0);
+        setTimeout(() => {
+          handleUserInput(triggerMessage);
+        }, 1200);
+      } else {
+        handleUserInput(triggerMessage);
+      }
+      clearTrigger();
+    }
+  }, [triggerMessage]);
 
   const simulateAgentMessage = (stepIndex: number) => {
     if (stepIndex >= flow.length) return;
@@ -128,7 +145,6 @@ export default function ChatWidget() {
                     <p className="text-[13px] leading-relaxed whitespace-pre-wrap">{message.text}</p>
                   </div>
                 </div>
-                {/* Suggestion chips */}
                 {message.suggestions && message.suggestions.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 mt-2 ml-1">
                     {message.suggestions.map((suggestion) => (

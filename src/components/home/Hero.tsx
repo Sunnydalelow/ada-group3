@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useAuthStore } from '@store/authStore';
+import { useChatStore } from '@store/chatStore';
+import { unauthFlow, authFlow } from '@data/chatFlows';
 
 interface Message {
   text: string;
@@ -40,29 +42,9 @@ export default function Hero() {
     }
   };
 
-  const quickActions = isAuthenticated && user?.type === 'patient'
-    ? [
-        { label: 'Log blood sugar reading', link: '/dashboard' },
-        { label: 'View my A1C history', link: '/dashboard' },
-        { label: 'Find a diabetes educator', link: '/resources' },
-      ]
-    : isAuthenticated && user?.type === 'donor'
-    ? [
-        { label: 'Make a donation', link: '#' },
-        { label: 'View my impact report', link: '/dashboard' },
-        { label: 'Set up recurring giving', link: '/dashboard' },
-      ]
-    : isAuthenticated && user?.type === 'volunteer'
-    ? [
-        { label: 'Find volunteer events', link: '/dashboard' },
-        { label: 'Log volunteer hours', link: '/dashboard' },
-        { label: 'Access training materials', link: '/resources' },
-      ]
-    : [
-        { label: 'Understanding diabetes', link: '/resources' },
-        { label: 'Find local support', link: '/support' },
-        { label: 'Ways to get involved', link: '/resources' },
-      ];
+  const { sendMessage } = useChatStore();
+  const flow = isAuthenticated ? authFlow : unauthFlow;
+  const conversationStarters = flow[0]?.suggestions || [];
 
   return (
     <section className="relative gradient-hero min-h-[85vh] flex items-center justify-center overflow-hidden">
@@ -183,16 +165,16 @@ export default function Hero() {
             </form>
           </div>
 
-          {/* Quick action pills */}
+          {/* Conversation starters */}
           <div className="flex flex-wrap justify-center gap-3">
-            {quickActions.map((action, index) => (
-              <a
-                key={index}
-                href={action.link}
+            {conversationStarters.map((starter) => (
+              <button
+                key={starter}
+                onClick={() => sendMessage(starter)}
                 className="px-5 py-2.5 glass rounded-xl text-white text-sm font-medium hover:bg-white hover:text-ada-red transition-all duration-200 shadow-sm"
               >
-                {action.label}
-              </a>
+                {starter}
+              </button>
             ))}
           </div>
         </div>
