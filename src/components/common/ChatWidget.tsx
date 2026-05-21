@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useAuthStore } from '@store/authStore';
-import Anthropic from '@anthropic-ai/sdk';
 
 interface Message {
   id: string;
@@ -8,11 +7,6 @@ interface Message {
   sender: 'user' | 'agent';
   timestamp: Date;
 }
-
-const anthropic = new Anthropic({
-  apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY,
-  dangerouslyAllowBrowser: true, // For prototype only - use backend proxy in production
-});
 
 export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
@@ -44,27 +38,16 @@ export default function ChatWidget() {
     setIsLoading(true);
 
     try {
-      // Call Claude API
-      const response = await anthropic.messages.create({
-        model: 'claude-3-5-sonnet-20241022',
-        max_tokens: 1024,
-        system: `You are a helpful assistant for the American Diabetes Association (ADA). Your role is to:
-- Provide accurate, compassionate information about diabetes
-- Guide users to relevant resources on the ADA website
-- Answer questions about diabetes management, nutrition, medications, and support
-- Encourage users to consult healthcare professionals for medical advice
-- Be warm, supportive, and understanding
-
-Keep responses concise and helpful. If asked about medical decisions, remind users to consult their healthcare provider.`,
-        messages: [
-          {
-            role: 'user',
-            content: userQuery,
-          },
-        ],
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: userQuery }),
       });
 
-      const agentText = response.content[0].type === 'text' ? response.content[0].text : 'I apologize, I had trouble processing that. Could you try rephrasing?';
+      const data = await res.json();
+      const agentText = res.ok
+        ? data.text
+        : 'I apologize, I had trouble processing that. Could you try rephrasing?';
 
       const agentMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -75,7 +58,7 @@ Keep responses concise and helpful. If asked about medical decisions, remind use
 
       setMessages((prev) => [...prev, agentMessage]);
     } catch (error) {
-      console.error('Claude API error:', error);
+      console.error('Chat error:', error);
 
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),

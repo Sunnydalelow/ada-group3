@@ -1,16 +1,10 @@
 import { useState } from 'react';
 import { useAuthStore } from '@store/authStore';
-import Anthropic from '@anthropic-ai/sdk';
 
 interface Message {
   text: string;
   sender: 'user' | 'agent';
 }
-
-const anthropic = new Anthropic({
-  apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY,
-  dangerouslyAllowBrowser: true,
-});
 
 export default function Hero() {
   const { isAuthenticated, user } = useAuthStore();
@@ -29,30 +23,18 @@ export default function Hero() {
     setIsLoading(true);
 
     try {
-      console.log('API Key present:', !!import.meta.env.VITE_ANTHROPIC_API_KEY);
-      console.log('Calling Claude API...');
-
-      const response = await anthropic.messages.create({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 1024,
-        system: `You are a helpful assistant for the American Diabetes Association (ADA). Your role is to:
-- Provide accurate, compassionate information about diabetes
-- Guide users to relevant resources
-- Answer questions about diabetes management, nutrition, medications, and support
-- Encourage users to consult healthcare professionals for medical advice
-- Be warm, supportive, and understanding
-
-Keep responses concise and helpful.`,
-        messages: [{ role: 'user', content: query }],
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: query }),
       });
 
-      console.log('Response received:', response);
-      const agentText = response.content[0].type === 'text' ? response.content[0].text : 'I apologize, I had trouble processing that.';
+      const data = await res.json();
+      const agentText = res.ok ? data.text : 'I apologize, I had trouble processing that.';
       setMessages([userMessage, { text: agentText, sender: 'agent' }]);
     } catch (error) {
-      console.error('Claude API error:', error);
-      console.error('Error details:', JSON.stringify(error, null, 2));
-      setMessages([userMessage, { text: `Error: ${error instanceof Error ? error.message : 'Unknown error'}. Check console for details.`, sender: 'agent' }]);
+      console.error('Chat error:', error);
+      setMessages([userMessage, { text: 'Unable to connect to the assistant. Please try again.', sender: 'agent' }]);
     } finally {
       setIsLoading(false);
     }
