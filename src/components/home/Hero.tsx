@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuthStore } from '@store/authStore';
-import { useChatStore } from '@store/chatStore';
 import { unauthFlow, authFlow } from '@data/chatFlows';
 
 interface Message {
@@ -14,8 +13,8 @@ export default function Hero() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const heroRef = useRef<HTMLElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const { sendMessage } = useChatStore();
   const flow = isAuthenticated ? authFlow : unauthFlow;
   const conversationStarters = flow[0]?.suggestions || [];
 
@@ -31,32 +30,43 @@ export default function Hero() {
     return () => el.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!searchQuery.trim() || isLoading) return;
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, isLoading]);
 
-    const userMessage: Message = { text: searchQuery, sender: 'user' };
-    setMessages([userMessage]);
-    const query = searchQuery;
-    setSearchQuery('');
+  const sendToApi = async (text: string) => {
+    const userMessage: Message = { text, sender: 'user' };
+    setMessages((prev) => [...prev, userMessage]);
     setIsLoading(true);
 
     try {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: query }),
+        body: JSON.stringify({ message: text }),
       });
 
       const data = await res.json();
       const agentText = res.ok ? data.text : 'I apologize, I had trouble processing that.';
-      setMessages([userMessage, { text: agentText, sender: 'agent' }]);
+      setMessages((prev) => [...prev, { text: agentText, sender: 'agent' }]);
     } catch (error) {
       console.error('Chat error:', error);
-      setMessages([userMessage, { text: 'Unable to connect to the assistant. Please try again.', sender: 'agent' }]);
+      setMessages((prev) => [...prev, { text: 'Unable to connect to the assistant. Please try again.', sender: 'agent' }]);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!searchQuery.trim() || isLoading) return;
+    const text = searchQuery;
+    setSearchQuery('');
+    sendToApi(text);
+  };
+
+  const handleStarterClick = (starter: string) => {
+    sendToApi(starter);
   };
 
   return (
@@ -68,11 +78,10 @@ export default function Hero() {
           alt=""
           className="w-full h-full object-cover"
         />
-        {/* Dark overlay for text contrast (accessibility) */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/60 to-black/40" />
       </div>
 
-      {/* Dotted glow pattern overlay */}
+      {/* Dotted glow pattern */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
@@ -80,7 +89,6 @@ export default function Hero() {
           backgroundSize: '28px 28px',
         }}
       />
-      {/* Mouse-following glow */}
       <div
         className="absolute inset-0 pointer-events-none opacity-70"
         style={{
@@ -91,7 +99,6 @@ export default function Hero() {
       {/* Content */}
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-20 md:py-28">
         <div className="max-w-3xl">
-          {/* Headline */}
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-5 text-white">
             {isAuthenticated && user ? (
               <>Welcome back, {user.name.split(' ')[0]}.</>
@@ -103,36 +110,41 @@ export default function Hero() {
             Your trusted source for diabetes information, support, and community.
           </p>
 
-          {/* Chat/Search box */}
-          <div className="mb-8 max-w-2xl">
+          {/* Chat area */}
+          <div className="max-w-2xl">
+            {/* Conversation thread (expands when messages exist) */}
             {messages.length > 0 && (
-              <div className="bg-white/95 backdrop-blur-md rounded-2xl p-5 mb-4 max-h-72 overflow-y-auto text-left shadow-xl border border-white/20">
-                {messages.map((msg, idx) => (
-                  <div key={idx} className={`mb-3 last:mb-0 ${msg.sender === 'user' ? 'text-right' : 'text-left'}`}>
-                    <div className={`inline-block max-w-[85%] rounded-xl px-4 py-2.5 ${
-                      msg.sender === 'user'
-                        ? 'bg-gradient-to-r from-ada-red to-ada-red-bright text-white'
-                        : 'bg-gray-100 text-ada-dark-gray'
-                    }`}>
-                      <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.text}</p>
-                    </div>
-                  </div>
-                ))}
-                {isLoading && (
-                  <div className="text-left">
-                    <div className="inline-block bg-gray-100 rounded-xl px-4 py-2.5">
-                      <div className="flex items-center gap-1.5">
-                        <div className="w-2 h-2 bg-ada-red/60 rounded-full animate-bounce" />
-                        <div className="w-2 h-2 bg-ada-red/60 rounded-full animate-bounce [animation-delay:0.1s]" />
-                        <div className="w-2 h-2 bg-ada-red/60 rounded-full animate-bounce [animation-delay:0.2s]" />
+              <div className="bg-white/95 backdrop-blur-md rounded-2xl p-5 mb-4 max-h-[400px] overflow-y-auto shadow-xl border border-white/20">
+                <div className="space-y-3">
+                  {messages.map((msg, idx) => (
+                    <div key={idx} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                      <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 ${
+                        msg.sender === 'user'
+                          ? 'bg-gradient-to-r from-ada-red to-ada-red-bright text-white rounded-br-md'
+                          : 'bg-gray-100 text-ada-dark-gray rounded-bl-md'
+                      }`}>
+                        <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.text}</p>
                       </div>
                     </div>
-                  </div>
-                )}
+                  ))}
+                  {isLoading && (
+                    <div className="flex justify-start">
+                      <div className="bg-gray-100 rounded-2xl rounded-bl-md px-4 py-3">
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-2 h-2 bg-ada-red/60 rounded-full animate-bounce" />
+                          <div className="w-2 h-2 bg-ada-red/60 rounded-full animate-bounce [animation-delay:0.1s]" />
+                          <div className="w-2 h-2 bg-ada-red/60 rounded-full animate-bounce [animation-delay:0.2s]" />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  <div ref={messagesEndRef} />
+                </div>
               </div>
             )}
 
-            <form onSubmit={handleSearch}>
+            {/* Input */}
+            <form onSubmit={handleSubmit}>
               <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-white/20">
                 <div className="flex items-center px-5 py-4">
                   <svg className="w-5 h-5 text-ada-muted-gray flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -148,7 +160,7 @@ export default function Hero() {
                   />
                   <button
                     type="submit"
-                    disabled={isLoading}
+                    disabled={isLoading || !searchQuery.trim()}
                     className="flex-shrink-0 w-10 h-10 bg-gradient-to-r from-ada-red to-ada-red-bright text-white rounded-xl flex items-center justify-center hover:shadow-lg hover:shadow-ada-red/30 transition-all disabled:opacity-50"
                     aria-label="Send"
                   >
@@ -166,19 +178,22 @@ export default function Hero() {
                 </div>
               </div>
             </form>
-          </div>
 
-          {/* Conversation starters */}
-          <div className="flex flex-wrap gap-2.5">
-            {conversationStarters.map((starter) => (
-              <button
-                key={starter}
-                onClick={() => sendMessage(starter)}
-                className="px-5 py-2.5 bg-white/10 backdrop-blur-sm border border-white/25 rounded-xl text-white text-sm font-medium hover:bg-white hover:text-ada-red hover:border-white transition-all duration-200"
-              >
-                {starter}
-              </button>
-            ))}
+            {/* Conversation starters — hidden once conversation starts */}
+            {messages.length === 0 && (
+              <div className="flex flex-wrap gap-2.5 mt-5">
+                {conversationStarters.map((starter) => (
+                  <button
+                    key={starter}
+                    onClick={() => handleStarterClick(starter)}
+                    disabled={isLoading}
+                    className="px-5 py-2.5 bg-white/10 backdrop-blur-sm border border-white/25 rounded-xl text-white text-sm font-medium hover:bg-white hover:text-ada-red hover:border-white transition-all duration-200 disabled:opacity-50"
+                  >
+                    {starter}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
