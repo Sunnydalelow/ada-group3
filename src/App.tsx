@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Header from '@components/common/Header';
 import Footer from '@components/common/Footer';
-import ChatWidget from '@components/common/ChatWidget';
 import Home from '@pages/Home';
 import Resources from '@pages/Resources';
 import Support from '@pages/Support';
@@ -23,7 +22,6 @@ function App() {
           </Routes>
         </main>
         <Footer />
-        <ChatWidget />
       </div>
     </BrowserRouter>
   );

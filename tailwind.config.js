@@ -8,14 +8,17 @@ export default {
     extend: {
       colors: {
         ada: {
-          red: '#A6192E',        // Primary brand red (diabetes.org)
-          blue: '#0070D2',       // Salesforce/help blue
-          navy: '#003B71',       // Deep blue for hero backgrounds
-          teal: '#008996',       // ADA accent teal (diabetes.org)
-          light: '#F3F3F3',      // Light gray background
-          gray: '#54698D',       // Medium gray for text
-          border: '#DDDBDA',     // Border color
-          darkgray: '#3E3E3C',   // Dark text
+          red: '#A6192E',        // Primary brand color (ADA Red)
+          'red-bright': '#D4253D', // Hover states, accents
+          teal: '#008996',       // Links, secondary highlights
+          green: '#0F851F',      // Success states
+          'alert-red': '#EC2227', // Error/urgent alerts
+          'dark-gray': '#3A3A3A', // Primary body text
+          'near-black': '#111827', // Headings
+          'muted-gray': '#737373', // Secondary/caption text
+          'warm-gray': '#D9D9D6', // Borders, dividers
+          'light-pink': '#F9EFF0', // Subtle accent backgrounds
+          white: '#FFFFFF',      // Page backgrounds
         },
       },
       fontFamily: {
