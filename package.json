@@ -13,6 +13,7 @@
     "node": "22.x"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.97.1",
     "express": "^5.0.0",
     "gsap": "^3.12.5",
     "react": "^19.0.0",

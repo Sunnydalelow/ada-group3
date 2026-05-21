@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuthStore } from '@store/authStore';
+import Anthropic from '@anthropic-ai/sdk';
 
 interface Message {
   id: string;
@@ -7,6 +8,11 @@ interface Message {
   sender: 'user' | 'agent';
   timestamp: Date;
 }
+
+const anthropic = new Anthropic({
+  apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY,
+  dangerouslyAllowBrowser: true, // For prototype only - use backend proxy in production
+});
 
 export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
@@ -19,10 +25,11 @@ export default function ChatWidget() {
     },
   ]);
   const [inputValue, setInputValue] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuthStore();
 
-  const handleSend = () => {
-    if (!inputValue.trim()) return;
+  const handleSend = async () => {
+    if (!inputValue.trim() || isLoading) return;
 
     const newUserMessage: Message = {
       id: Date.now().toString(),
@@ -32,26 +39,55 @@ export default function ChatWidget() {
     };
 
     setMessages((prev) => [...prev, newUserMessage]);
+    const userQuery = inputValue;
     setInputValue('');
+    setIsLoading(true);
 
-    // Mock agent response
-    setTimeout(() => {
-      const responses = [
-        'I can help you with that. Let me find the best resources for you.',
-        'That\'s a great question. Based on your profile, I recommend checking out our comprehensive guide.',
-        'I understand your concern. Would you like me to connect you with a specialist or provide some initial information?',
-        'Here are some resources that might help. Would you like more specific information?',
-      ];
+    try {
+      // Call Claude API
+      const response = await anthropic.messages.create({
+        model: 'claude-3-5-sonnet-20241022',
+        max_tokens: 1024,
+        system: `You are a helpful assistant for the American Diabetes Association (ADA). Your role is to:
+- Provide accurate, compassionate information about diabetes
+- Guide users to relevant resources on the ADA website
+- Answer questions about diabetes management, nutrition, medications, and support
+- Encourage users to consult healthcare professionals for medical advice
+- Be warm, supportive, and understanding
+
+Keep responses concise and helpful. If asked about medical decisions, remind users to consult their healthcare provider.`,
+        messages: [
+          {
+            role: 'user',
+            content: userQuery,
+          },
+        ],
+      });
+
+      const agentText = response.content[0].type === 'text' ? response.content[0].text : 'I apologize, I had trouble processing that. Could you try rephrasing?';
 
       const agentMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: responses[Math.floor(Math.random() * responses.length)],
+        text: agentText,
         sender: 'agent',
         timestamp: new Date(),
       };
 
       setMessages((prev) => [...prev, agentMessage]);
-    }, 1000);
+    } catch (error) {
+      console.error('Claude API error:', error);
+
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: 'I apologize, but I\'m having trouble connecting right now. Please try again in a moment or contact our support team for immediate assistance.',
+        sender: 'agent',
+        timestamp: new Date(),
+      };
+
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -140,16 +176,24 @@ export default function ChatWidget() {
               />
               <button
                 onClick={handleSend}
-                className="px-4 py-2 bg-ada-red text-white rounded-lg hover:bg-ada-red/90 transition-colors"
+                disabled={isLoading}
+                className="px-4 py-2 bg-ada-red text-white rounded-lg hover:bg-ada-red/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-                  />
-                </svg>
+                {isLoading ? (
+                  <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                    />
+                  </svg>
+                )}
               </button>
             </div>
           </div>
