@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:trailhead.salesforce.com)",
+      "WebFetch(domain:help.salesforce.com)",
+      "WebFetch(domain:developer.salesforce.com)",
+      "WebFetch(domain:www.diabetes.org)",
+      "WebFetch(domain:professional.diabetes.org)",
+      "WebFetch(domain:diabetes.org)",
+      "WebFetch(domain:brandfetch.com)",
+      "WebFetch(domain:www2.diabetes.org)",
+      "Read(//Users/splaisted/agentforce-adlc/skills/developing-agentforce/references/**)",
+      "Read(//Users/splaisted/agentforce-adlc/skills/developing-agentforce/assets/**)"
+    ]
+  }
+}

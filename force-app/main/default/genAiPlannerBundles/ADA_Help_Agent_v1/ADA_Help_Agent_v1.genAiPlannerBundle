@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GenAiPlannerBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Unified help agent for help.diabetes.org serving patients, donors, and volunteers</description>
+    <localTopicLinks>
+        <genAiPluginName>diabetes_resources_16jDS000000CaxD</genAiPluginName>
+    </localTopicLinks>
+    <localTopicLinks>
+        <genAiPluginName>donor_engagement_16jDS000000CaxD</genAiPluginName>
+    </localTopicLinks>
+    <localTopicLinks>
+        <genAiPluginName>topic_selector_16jDS000000CaxD</genAiPluginName>
+    </localTopicLinks>
+    <localTopicLinks>
+        <genAiPluginName>volunteer_support_16jDS000000CaxD</genAiPluginName>
+    </localTopicLinks>
+    <localTopics>
+        <fullName>topic_selector_16jDS000000CaxD</fullName>
+        <canEscalate>false</canEscalate>
+        <description>Identify user intent and route to the appropriate topic</description>
+        <developerName>topic_selector_16jDS000000CaxD</developerName>
+        <genAiPluginInstructions>
+            <description>You are a supportive, knowledgeable guide for the American Diabetes Association. Always use person-first language (say &apos;people living with diabetes&apos;, never &apos;diabetics&apos;). Be warm, empowering, and action-oriented. Lead with empathy, follow with action. Keep responses concise and helpful.</description>
+            <developerName>instruction0_179DS000000CbsH</developerName>
+            <language>en_US</language>
+            <masterLabel>instruction0_179DS000000CbsH</masterLabel>
+            <sortOrder>1</sortOrder>
+        </genAiPluginInstructions>
+        <language>en_US</language>
+        <localDeveloperName>topic_selector</localDeveloperName>
+        <masterLabel>Topic Selector</masterLabel>
+        <pluginType>Topic</pluginType>
+    </localTopics>
+    <localTopics>
+        <fullName>donor_engagement_16jDS000000CaxD</fullName>
+        <canEscalate>false</canEscalate>
+        <description>Help donors give, learn about campaigns, and see their impact</description>
+        <developerName>donor_engagement_16jDS000000CaxD</developerName>
+        <genAiPluginInstructions>
+            <description>You are a supportive, knowledgeable guide for the American Diabetes Association. Always use person-first language (say &apos;people living with diabetes&apos;, never &apos;diabetics&apos;). Be warm, empowering, and action-oriented. Lead with empathy, follow with action. Keep responses concise and helpful.</description>
+            <developerName>instruction0_179DS000000CbsI</developerName>
+            <language>en_US</language>
+            <masterLabel>instruction0_179DS000000CbsI</masterLabel>
+            <sortOrder>1</sortOrder>
+        </genAiPluginInstructions>
+        <language>en_US</language>
+        <localDeveloperName>donor_engagement</localDeveloperName>
+        <masterLabel>Donor Engagement</masterLabel>
+        <pluginType>Topic</pluginType>
+    </localTopics>
+    <localTopics>
+        <fullName>diabetes_resources_16jDS000000CaxD</fullName>
+        <canEscalate>false</canEscalate>
+        <description>Help people living with diabetes find resources, education, and support</description>
+        <developerName>diabetes_resources_16jDS000000CaxD</developerName>
+        <genAiPluginInstructions>
+            <description>You are a supportive, knowledgeable guide for the American Diabetes Association. Always use person-first language (say &apos;people living with diabetes&apos;, never &apos;diabetics&apos;). Be warm, empowering, and action-oriented. Lead with empathy, follow with action. Keep responses concise and helpful.</description>
+            <developerName>instruction0_179DS000000CbsF</developerName>
+            <language>en_US</language>
+            <masterLabel>instruction0_179DS000000CbsF</masterLabel>
+            <sortOrder>1</sortOrder>
+        </genAiPluginInstructions>
+        <language>en_US</language>
+        <localDeveloperName>diabetes_resources</localDeveloperName>
+        <masterLabel>Diabetes Resources</masterLabel>
+        <pluginType>Topic</pluginType>
+    </localTopics>
+    <localTopics>
+        <fullName>volunteer_support_16jDS000000CaxD</fullName>
+        <canEscalate>false</canEscalate>
+        <description>Help volunteers find events, sign up, and track their involvement</description>
+        <developerName>volunteer_support_16jDS000000CaxD</developerName>
+        <genAiPluginInstructions>
+            <description>You are a supportive, knowledgeable guide for the American Diabetes Association. Always use person-first language (say &apos;people living with diabetes&apos;, never &apos;diabetics&apos;). Be warm, empowering, and action-oriented. Lead with empathy, follow with action. Keep responses concise and helpful.</description>
+            <developerName>instruction0_179DS000000CbsG</developerName>
+            <language>en_US</language>
+            <masterLabel>instruction0_179DS000000CbsG</masterLabel>
+            <sortOrder>1</sortOrder>
+        </genAiPluginInstructions>
+        <language>en_US</language>
+        <localDeveloperName>volunteer_support</localDeveloperName>
+        <masterLabel>Volunteer Support</masterLabel>
+        <pluginType>Topic</pluginType>
+    </localTopics>
+    <masterLabel>ADA Help Agent</masterLabel>
+    <plannerType>Atlas__ConcurrentMultiAgentOrchestration</plannerType>
+</GenAiPlannerBundle>

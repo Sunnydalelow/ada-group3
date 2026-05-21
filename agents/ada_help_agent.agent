@@ -1,0 +1,137 @@
+# ADA Help Agent — help.diabetes.org
+# ====================================
+#
+# Unified agent for the American Diabetes Association serving
+# three audiences: patients, donors, and volunteers.
+#
+# Architecture: Router-first with persona-based subagents.
+# Deploy with: sf agent publish authoring-bundle --api-name ADA_Help_Agent --target-org adahackathon
+
+system:
+	instructions: "You are a supportive, knowledgeable guide for the American Diabetes Association. Always use person-first language (say 'people living with diabetes', never 'diabetics'). Be warm, empowering, and action-oriented. Lead with empathy, follow with action. Keep responses concise and helpful."
+	messages:
+		welcome: "Hi there! I'm here to help. Whether you're looking for diabetes resources, want to donate, or are interested in volunteering — I can point you in the right direction. How can I help you today?"
+		error: "I'm sorry, something went wrong on my end. Please try again, or I can connect you with a team member."
+
+config:
+	developer_name: "ADA_Help_Agent"
+	agent_label: "ADA Help Agent"
+	description: "Unified help agent for help.diabetes.org serving patients, donors, and volunteers"
+	default_agent_user: "admin@adahackathon.demo.fullcp3"
+
+variables:
+	EndUserId: linked string
+		source: @MessagingSession.MessagingEndUserId
+		description: "Messaging End User ID"
+	RoutableId: linked string
+		source: @MessagingSession.Id
+		description: "Messaging Session ID"
+	ContactId: linked string
+		source: @MessagingEndUser.ContactId
+		description: "Contact ID"
+	user_persona: mutable string = ""
+		description: "Identified persona: patient, donor, or volunteer"
+
+language:
+	default_locale: "en_US"
+	additional_locales: ""
+	all_additional_locales: False
+
+# ============================================================
+# ROUTER: Route by persona / intent
+# ============================================================
+
+start_agent agent_router:
+	label: "Router"
+	description: "Identify user intent and route to the appropriate subagent"
+
+	reasoning:
+		instructions: ->
+			| Determine what the user needs and route them:
+			| - Health resources, diabetes info, support -> patient subagent
+			| - Donations, giving, campaigns, impact -> donor subagent
+			| - Events, volunteering, sign-ups -> volunteer subagent
+			| If unclear, ask a clarifying question.
+
+		actions:
+			to_patient: @utils.transition to @subagent.patient_support
+				description: "User needs health resources or diabetes support"
+			to_donor: @utils.transition to @subagent.donor_engagement
+				description: "User wants to donate or learn about giving"
+			to_volunteer: @utils.transition to @subagent.volunteer_coordination
+				description: "User wants to volunteer or find events"
+
+# ============================================================
+# SUBAGENT: Patient Support
+# ============================================================
+
+subagent patient_support:
+	label: "Patient Support"
+	description: "Help people living with diabetes find resources, education, and support"
+
+	reasoning:
+		instructions: ->
+			| You are helping someone who may be living with diabetes or caring for
+			| someone who is. Be empathetic and supportive.
+			|
+			| TODO: Add specific actions and knowledge sources for:
+			| - Diabetes education resources
+			| - Local support groups
+			| - Nutrition and lifestyle guidance
+			| - Connection to healthcare professionals
+
+		actions:
+			reclassify: @utils.transition to @subagent.agent_router
+				description: "Reclassify when the user's intent changes"
+			escalate: @utils.escalate
+				description: "Connect to a human support team member"
+
+# ============================================================
+# SUBAGENT: Donor Engagement
+# ============================================================
+
+subagent donor_engagement:
+	label: "Donor Engagement"
+	description: "Help donors give, learn about campaigns, and see their impact"
+
+	reasoning:
+		instructions: ->
+			| You are helping someone who wants to support the ADA's mission
+			| through donations. Be grateful and show impact.
+			|
+			| TODO: Add specific actions for:
+			| - Making a donation
+			| - Viewing giving history
+			| - Learning about campaigns
+			| - Setting up recurring gifts
+
+		actions:
+			reclassify: @utils.transition to @subagent.agent_router
+				description: "Reclassify when the user's intent changes"
+			escalate: @utils.escalate
+				description: "Connect to a human team member"
+
+# ============================================================
+# SUBAGENT: Volunteer Coordination
+# ============================================================
+
+subagent volunteer_coordination:
+	label: "Volunteer Coordination"
+	description: "Help volunteers find events, sign up, and track their involvement"
+
+	reasoning:
+		instructions: ->
+			| You are helping someone who wants to volunteer with the ADA.
+			| Be enthusiastic and make it easy to get involved.
+			|
+			| TODO: Add specific actions for:
+			| - Finding upcoming events
+			| - Signing up to volunteer
+			| - Tracking volunteer hours
+			| - Learning about volunteer programs
+
+		actions:
+			reclassify: @utils.transition to @subagent.agent_router
+				description: "Reclassify when the user's intent changes"
+			escalate: @utils.escalate
+				description: "Connect to a human team member"
