@@ -27,12 +27,12 @@ export default function LoginModal({ onClose }: LoginModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={onClose}>
-      <div className="bg-white rounded-xl p-8 max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50" onClick={onClose}>
+      <div className="glass-card rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-ada-navy">Sign In</h2>
-          <button onClick={onClose} className="text-ada-gray hover:text-ada-navy">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <h2 className="text-2xl font-bold text-ada-near-black">Sign In</h2>
+          <button onClick={onClose} className="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center text-ada-muted-gray hover:text-ada-near-black transition-colors">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
@@ -40,7 +40,7 @@ export default function LoginModal({ onClose }: LoginModalProps) {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-ada-navy mb-1">
+            <label htmlFor="email" className="block text-sm font-medium text-ada-dark-gray mb-1.5">
               Email
             </label>
             <input
@@ -48,13 +48,13 @@ export default function LoginModal({ onClose }: LoginModalProps) {
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2 border border-ada-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ada-blue"
+              className="w-full px-4 py-2.5 bg-white/80 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-ada-red/20 focus:border-ada-red/30 transition-all"
               required
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-ada-navy mb-1">
+            <label htmlFor="password" className="block text-sm font-medium text-ada-dark-gray mb-1.5">
               Password
             </label>
             <input
@@ -62,28 +62,28 @@ export default function LoginModal({ onClose }: LoginModalProps) {
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 border border-ada-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ada-blue"
+              className="w-full px-4 py-2.5 bg-white/80 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-ada-red/20 focus:border-ada-red/30 transition-all"
               required
             />
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
               {error}
             </div>
           )}
 
           <button
             type="submit"
-            className="w-full bg-ada-red text-white py-3 rounded-lg hover:bg-ada-red/90 transition-colors font-medium"
+            className="w-full bg-gradient-to-r from-ada-red to-ada-red-bright text-white py-3 rounded-xl hover:shadow-lg hover:shadow-ada-red/20 transition-all font-medium"
           >
             Sign In
           </button>
         </form>
 
-        <div className="mt-6 p-4 bg-ada-light rounded-lg">
-          <p className="text-sm text-ada-navy font-medium mb-2">Demo Accounts:</p>
-          <ul className="text-xs text-ada-gray space-y-1">
+        <div className="mt-6 p-4 bg-gray-50/80 rounded-xl border border-gray-100">
+          <p className="text-sm text-ada-dark-gray font-medium mb-2">Demo Accounts:</p>
+          <ul className="text-xs text-ada-muted-gray space-y-1">
             <li>• patient@demo.com / demo123 (Patient)</li>
             <li>• donor@demo.com / demo123 (Donor)</li>
             <li>• volunteer@demo.com / demo123 (Volunteer)</li>
@@ -91,11 +91,11 @@ export default function LoginModal({ onClose }: LoginModalProps) {
         </div>
 
         <div className="mt-4 text-center">
-          <a href="#" className="text-sm text-ada-blue hover:underline">
+          <a href="#" className="text-sm text-ada-red hover:text-ada-red-bright font-medium transition-colors">
             Forgot password?
           </a>
-          <span className="text-ada-gray mx-2">|</span>
-          <a href="#" className="text-sm text-ada-blue hover:underline">
+          <span className="text-ada-warm-gray mx-3">|</span>
+          <a href="#" className="text-sm text-ada-red hover:text-ada-red-bright font-medium transition-colors">
             Create account
           </a>
         </div>

@@ -43,24 +43,27 @@ export default function QuickActions() {
       : defaultActions;
 
   return (
-    <section id="quick-actions" className="py-16">
-      <div className="max-w-container mx-auto px-4">
-        <h2 className="text-3xl font-bold text-ada-navy mb-8">Quick Actions</h2>
+    <section className="py-16 mesh-bg">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 className="text-3xl md:text-4xl font-bold text-ada-near-black mb-2">Quick Actions</h2>
+        <p className="text-ada-muted-gray text-lg mb-8">Get started with what matters most to you</p>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
           {actions.map((action, index) => (
             <Link
               key={index}
               to={action.link}
-              className="group p-6 bg-white border border-ada-border rounded-xl hover:shadow-lg hover:border-ada-blue transition-all duration-300"
+              className="group glass-card rounded-2xl p-6 hover:scale-[1.03] transition-all duration-300"
             >
-              <div className="text-4xl mb-4 transform group-hover:scale-110 transition-transform">{action.icon}</div>
-              <h3 className="text-lg font-bold text-ada-navy mb-2 group-hover:text-ada-blue transition-colors">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-ada-red/10 to-ada-red-bright/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <span className="text-2xl">{action.icon}</span>
+              </div>
+              <h3 className="text-base font-bold text-ada-near-black mb-1.5 group-hover:text-ada-red transition-colors">
                 {action.title}
               </h3>
-              <p className="text-sm text-ada-gray">{action.description}</p>
-              <div className="mt-4 text-ada-blue text-sm font-medium flex items-center gap-1 group-hover:gap-2 transition-all">
-                Learn more
+              <p className="text-sm text-ada-muted-gray leading-relaxed">{action.description}</p>
+              <div className="mt-4 text-ada-red text-sm font-semibold flex items-center gap-1 group-hover:gap-2 transition-all">
+                Get started
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
