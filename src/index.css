@@ -1,10 +1,12 @@
-@import 'tailwindcss';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
-  --ada-red: #CC092F;
+  --ada-red: #A6192E;
   --ada-blue: #0070D2;
   --ada-navy: #003B71;
-  --ada-teal: #00A1B7;
+  --ada-teal: #008996;
   --ada-light: #F3F3F3;
   --ada-gray: #54698D;
   --ada-border: #DDDBDA;
@@ -18,7 +20,7 @@
 }
 
 body {
-  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   color: var(--ada-darkgray);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
@@ -26,7 +28,7 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Roboto', 'Open Sans', sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 
 #root {

@@ -1,15 +1,18 @@
 import { useState } from 'react';
 import { mockResources } from '@data/mockResources';
 
+type AudienceType = 'patient' | 'donor' | 'volunteer';
+
 export default function Resources() {
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedAudience, setSelectedAudience] = useState<AudienceType>('patient');
 
-  const categories = ['all', 'Managing Diabetes', 'Nutrition', 'Treatment', 'Mental Health', 'Research'];
+  const audiences: { value: AudienceType; label: string }[] = [
+    { value: 'patient', label: 'For Patients' },
+    { value: 'donor', label: 'For Donors' },
+    { value: 'volunteer', label: 'For Volunteers' },
+  ];
 
-  const filteredResources =
-    selectedCategory === 'all'
-      ? mockResources
-      : mockResources.filter((r) => r.category === selectedCategory);
+  const filteredResources = mockResources.filter((r) => r.audience === selectedAudience);
 
   return (
     <div className="py-12">
@@ -19,21 +22,26 @@ export default function Resources() {
           Explore comprehensive guides, articles, and tools to help you on your journey
         </p>
 
-        {/* Category filter */}
-        <div className="flex gap-3 mb-8 flex-wrap">
-          {categories.map((category) => (
-            <button
-              key={category}
-              onClick={() => setSelectedCategory(category)}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                selectedCategory === category
-                  ? 'bg-ada-red text-white'
-                  : 'bg-ada-light text-ada-navy hover:bg-ada-border'
-              }`}
-            >
-              {category === 'all' ? 'All Topics' : category}
-            </button>
-          ))}
+        {/* Audience tabs */}
+        <div className="border-b border-ada-border mb-8">
+          <div className="flex gap-1">
+            {audiences.map((audience) => (
+              <button
+                key={audience.value}
+                onClick={() => setSelectedAudience(audience.value)}
+                className={`px-6 py-3 font-semibold transition-all relative ${
+                  selectedAudience === audience.value
+                    ? 'text-ada-red'
+                    : 'text-ada-gray hover:text-ada-navy'
+                }`}
+              >
+                {audience.label}
+                {selectedAudience === audience.value && (
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-ada-red"></span>
+                )}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Resources grid */}

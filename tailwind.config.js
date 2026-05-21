@@ -8,10 +8,10 @@ export default {
     extend: {
       colors: {
         ada: {
-          red: '#CC092F',        // Primary brand red
+          red: '#A6192E',        // Primary brand red (diabetes.org)
           blue: '#0070D2',       // Salesforce/help blue
           navy: '#003B71',       // Deep blue for hero backgrounds
-          teal: '#00A1B7',       // ADA accent teal
+          teal: '#008996',       // ADA accent teal (diabetes.org)
           light: '#F3F3F3',      // Light gray background
           gray: '#54698D',       // Medium gray for text
           border: '#DDDBDA',     // Border color
@@ -19,8 +19,8 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['Open Sans', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
-        heading: ['Roboto', 'Open Sans', 'sans-serif'],
+        sans: ['Inter', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
+        heading: ['Inter', 'sans-serif'],
       },
       maxWidth: {
         'container': '1200px',
