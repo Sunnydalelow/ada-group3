@@ -113,7 +113,7 @@ export default function Hero() {
   };
 
   return (
-    <section ref={heroRef} className="relative min-h-[90vh] flex items-start overflow-hidden">
+    <section ref={heroRef} className="relative h-screen overflow-hidden">
       {/* Background image */}
       <div className="absolute inset-0">
         <img
@@ -139,23 +139,23 @@ export default function Hero() {
         }}
       />
 
-      {/* Content — pinned to top with fixed padding, no centering */}
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-16 pb-20 md:pt-24 md:pb-28">
+      {/* Content — fixed layout, never changes height */}
+      <div className="relative h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center">
         <div className="max-w-3xl">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-4 text-white">
+          <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold mb-4 text-white">
             {isAuthenticated && user ? (
               <>Welcome back, {user.name.split(' ')[0]}.</>
             ) : (
               <>How can we help?</>
             )}
           </h1>
-          <p className="text-lg md:text-xl text-white/90 mb-8 max-w-xl leading-relaxed">
+          <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-xl leading-relaxed">
             Your trusted source for diabetes information, support, and community.
           </p>
 
-          {/* Chat panel — fixed structure, scrolls internally */}
+          {/* Chat panel — fixed height, content scrolls inside */}
           <div className="max-w-2xl">
-            <div className="bg-white rounded-2xl shadow-2xl flex flex-col h-[420px]">
+            <div className="bg-white rounded-2xl shadow-2xl flex flex-col h-[360px]">
               {/* Messages area — always present, scrolls */}
               <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-5 space-y-3 min-h-0">
                 {messages.length === 0 ? (
