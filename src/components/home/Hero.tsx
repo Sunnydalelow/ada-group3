@@ -66,12 +66,35 @@ export default function Hero() {
 
   return (
     <section className="relative gradient-hero min-h-[85vh] flex items-center justify-center overflow-hidden">
-      {/* Decorative background elements */}
+      {/* Decorative background */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-ada-red-bright/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/3 right-1/3 w-72 h-72 bg-white/3 rounded-full blur-3xl" />
+        <div className="absolute -top-40 -right-40 w-[500px] h-[500px] bg-white/5 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] bg-white/5 rounded-full blur-3xl" />
+        <div className="absolute top-1/3 left-1/3 w-72 h-72 bg-ada-red-bright/20 rounded-full blur-[100px]" />
+      </div>
+
+      {/* People photos floating */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none hidden lg:block">
+        <img
+          src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=200&h=200&fit=crop&crop=face"
+          alt=""
+          className="absolute top-20 left-12 w-20 h-20 rounded-2xl object-cover opacity-30 rotate-6 shadow-lg"
+        />
+        <img
+          src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=200&h=200&fit=crop&crop=face"
+          alt=""
+          className="absolute bottom-32 left-20 w-16 h-16 rounded-xl object-cover opacity-25 -rotate-3 shadow-lg"
+        />
+        <img
+          src="https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=200&h=200&fit=crop&crop=face"
+          alt=""
+          className="absolute top-32 right-16 w-16 h-16 rounded-xl object-cover opacity-25 -rotate-6 shadow-lg"
+        />
+        <img
+          src="https://images.unsplash.com/photo-1551190822-a9ce113ac100?w=200&h=200&fit=crop&crop=face"
+          alt=""
+          className="absolute bottom-24 right-24 w-20 h-20 rounded-2xl object-cover opacity-30 rotate-3 shadow-lg"
+        />
       </div>
 
       <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-16 md:py-24">
@@ -95,7 +118,7 @@ export default function Hero() {
             Your trusted source for diabetes information, support, and community.
           </p>
 
-          {/* Chat/Search box with glassmorphism */}
+          {/* Chat/Search box */}
           <div className="mb-8 md:mb-12 max-w-3xl mx-auto">
             {messages.length > 0 && (
               <div className="glass-card rounded-2xl p-6 mb-4 max-h-80 overflow-y-auto text-left">

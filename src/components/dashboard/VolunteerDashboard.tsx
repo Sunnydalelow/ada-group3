@@ -1,4 +1,5 @@
 import { useAuthStore } from '@store/authStore';
+import DottedGlowBackground from '@components/common/DottedGlowBackground';
 
 export default function VolunteerDashboard() {
   const { user } = useAuthStore();
@@ -10,89 +11,114 @@ export default function VolunteerDashboard() {
   ];
 
   return (
-    <div className="py-12">
-      <div className="max-w-container mx-auto px-4">
-        <h1 className="text-4xl font-bold text-ada-navy mb-2">Welcome back, {user?.name.split(' ')[0]}!</h1>
-        <p className="text-ada-gray text-lg mb-8">Thank you for your commitment to the diabetes community</p>
-
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          <div className="bg-gradient-to-br from-green-500 to-green-600 text-white p-6 rounded-xl">
-            <div className="text-3xl mb-2">⏰</div>
-            <h3 className="text-3xl font-bold mb-1">48</h3>
-            <p className="text-white/90">Hours Volunteered</p>
-            <p className="text-xs text-white/70 mt-2">This year</p>
+    <DottedGlowBackground className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      <div className="py-12 md:py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Welcome banner */}
+          <div className="glass-card rounded-2xl p-8 mb-10 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 to-blue-500/5" />
+            <div className="relative flex items-center gap-6">
+              <img
+                src="https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=120&h=120&fit=crop&crop=face"
+                alt="Volunteer"
+                className="w-16 h-16 rounded-2xl object-cover shadow-md hidden sm:block"
+              />
+              <div>
+                <h1 className="text-3xl md:text-4xl font-bold text-ada-near-black mb-1">
+                  Welcome back, {user?.name.split(' ')[0]}!
+                </h1>
+                <p className="text-ada-muted-gray text-lg">Thank you for your commitment to the diabetes community</p>
+              </div>
+            </div>
           </div>
 
-          <div className="bg-gradient-to-br from-blue-500 to-blue-600 text-white p-6 rounded-xl">
-            <div className="text-3xl mb-2">📅</div>
-            <h3 className="text-3xl font-bold mb-1">12</h3>
-            <p className="text-white/90">Events Supported</p>
-            <p className="text-xs text-white/70 mt-2">Since joining</p>
+          {/* Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-12">
+            <div className="rounded-2xl p-6 bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/20">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-medium text-white/80">Hours Volunteered</span>
+                <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">⏰</div>
+              </div>
+              <h3 className="text-3xl font-bold mb-0.5">48</h3>
+              <p className="text-white/70 text-sm">This year</p>
+            </div>
+
+            <div className="rounded-2xl p-6 bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/20">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-medium text-white/80">Events Supported</span>
+                <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">📅</div>
+              </div>
+              <h3 className="text-3xl font-bold mb-0.5">12</h3>
+              <p className="text-white/70 text-sm">Since joining</p>
+            </div>
+
+            <div className="rounded-2xl p-6 bg-gradient-to-br from-violet-500 to-violet-600 text-white shadow-lg shadow-violet-500/20">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-medium text-white/80">Impact Rating</span>
+                <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">🌟</div>
+              </div>
+              <h3 className="text-3xl font-bold mb-0.5">Top 10%</h3>
+              <p className="text-white/70 text-sm">Among all volunteers</p>
+            </div>
           </div>
 
-          <div className="bg-gradient-to-br from-purple-500 to-purple-600 text-white p-6 rounded-xl">
-            <div className="text-3xl mb-2">🌟</div>
-            <h3 className="text-3xl font-bold mb-1">Top 10%</h3>
-            <p className="text-white/90">Impact Rating</p>
-            <p className="text-xs text-white/70 mt-2">Among all volunteers</p>
-          </div>
-        </div>
-
-        {/* Upcoming Events */}
-        <div className="mb-12">
-          <h2 className="text-2xl font-bold text-ada-navy mb-6">Your Upcoming Events</h2>
-          <div className="space-y-4">
-            {upcomingEvents.map((event, index) => (
-              <div key={index} className="bg-white rounded-xl p-6 border border-ada-border flex items-center justify-between">
-                <div className="flex items-center gap-6">
-                  <div className="text-center bg-ada-light rounded-lg p-4">
-                    <div className="text-sm font-medium text-ada-navy">
-                      {new Date(event.date).toLocaleDateString('en-US', { month: 'short' })}
+          {/* Upcoming Events */}
+          <div className="mb-12">
+            <h2 className="text-2xl font-bold text-ada-near-black mb-6">Upcoming Events</h2>
+            <div className="space-y-3">
+              {upcomingEvents.map((event, index) => (
+                <div key={index} className="glass-card rounded-2xl p-5 flex items-center justify-between hover:scale-[1.01] transition-all duration-300">
+                  <div className="flex items-center gap-5">
+                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-ada-red/10 to-ada-red-bright/10 flex flex-col items-center justify-center flex-shrink-0">
+                      <span className="text-[10px] font-semibold text-ada-red uppercase">
+                        {new Date(event.date).toLocaleDateString('en-US', { month: 'short' })}
+                      </span>
+                      <span className="text-lg font-bold text-ada-red leading-none">
+                        {new Date(event.date).getDate()}
+                      </span>
                     </div>
-                    <div className="text-2xl font-bold text-ada-red">
-                      {new Date(event.date).getDate()}
+                    <div>
+                      <h3 className="font-bold text-ada-near-black mb-0.5">{event.name}</h3>
+                      <p className="text-sm text-ada-muted-gray">{event.location}</p>
+                      <span className="inline-block mt-1 px-2.5 py-0.5 bg-ada-teal/10 text-ada-teal text-xs rounded-full font-medium">
+                        {event.role}
+                      </span>
                     </div>
                   </div>
-                  <div>
-                    <h3 className="font-bold text-ada-navy text-lg mb-1">{event.name}</h3>
-                    <p className="text-sm text-ada-gray">📍 {event.location}</p>
-                    <span className="inline-block mt-2 px-3 py-1 bg-ada-light text-ada-navy text-xs rounded-full">
-                      {event.role}
-                    </span>
-                  </div>
+                  <button className="px-4 py-2 bg-gradient-to-r from-ada-red to-ada-red-bright text-white rounded-xl text-sm font-medium hover:shadow-md hover:shadow-ada-red/20 transition-all hidden sm:block">
+                    Details
+                  </button>
                 </div>
-                <button className="px-6 py-2 bg-ada-red text-white rounded-lg hover:bg-ada-red/90 transition-colors">
-                  View Details
+              ))}
+            </div>
+          </div>
+
+          {/* CTAs */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="rounded-2xl p-8 bg-gradient-to-br from-ada-near-black to-ada-near-black/90 text-white relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-ada-teal/10 to-transparent" />
+              <div className="relative">
+                <h3 className="text-xl font-bold mb-3">Find More Opportunities</h3>
+                <p className="mb-5 text-white/70 text-sm">Browse upcoming events and make an impact.</p>
+                <button className="px-5 py-2.5 bg-white text-ada-near-black rounded-xl font-medium text-sm hover:shadow-lg transition-all">
+                  Browse Events
                 </button>
               </div>
-            ))}
-          </div>
-        </div>
+            </div>
 
-        {/* Action Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-gradient-to-r from-ada-navy to-ada-blue text-white p-8 rounded-xl">
-            <h3 className="text-2xl font-bold mb-4">🎯 Find More Opportunities</h3>
-            <p className="mb-6 text-white/90">
-              Browse upcoming events and find new ways to make an impact in your community.
-            </p>
-            <button className="px-6 py-3 bg-white text-ada-navy rounded-lg hover:bg-white/90 transition-colors font-medium">
-              Browse Events
-            </button>
-          </div>
-
-          <div className="bg-gradient-to-r from-green-600 to-green-700 text-white p-8 rounded-xl">
-            <h3 className="text-2xl font-bold mb-4">👥 Invite Friends</h3>
-            <p className="mb-6 text-white/90">
-              Share the impact of volunteering with friends and family. Grow the movement!
-            </p>
-            <button className="px-6 py-3 bg-white text-green-700 rounded-lg hover:bg-white/90 transition-colors font-medium">
-              Share Link
-            </button>
+            <div className="rounded-2xl p-8 bg-gradient-to-br from-emerald-600 to-emerald-700 text-white relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent" />
+              <div className="relative">
+                <h3 className="text-xl font-bold mb-3">Invite Friends</h3>
+                <p className="mb-5 text-white/70 text-sm">Share the impact of volunteering. Grow the movement!</p>
+                <button className="px-5 py-2.5 bg-white text-emerald-700 rounded-xl font-medium text-sm hover:shadow-lg transition-all">
+                  Share Link
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </DottedGlowBackground>
   );
 }

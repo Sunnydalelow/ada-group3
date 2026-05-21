@@ -1,4 +1,5 @@
 import { useAuthStore } from '@store/authStore';
+import DottedGlowBackground from '@components/common/DottedGlowBackground';
 
 export default function DonorDashboard() {
   const { user } = useAuthStore();
@@ -10,85 +11,108 @@ export default function DonorDashboard() {
   ];
 
   return (
-    <div className="py-12">
-      <div className="max-w-container mx-auto px-4">
-        <h1 className="text-4xl font-bold text-ada-navy mb-2">Thank you, {user?.name.split(' ')[0]}!</h1>
-        <p className="text-ada-gray text-lg mb-8">Your generosity is making a real difference in the fight against diabetes</p>
-
-        {/* Impact Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          <div className="bg-gradient-to-br from-ada-red to-red-600 text-white p-6 rounded-xl">
-            <div className="text-3xl mb-2">💝</div>
-            <h3 className="text-3xl font-bold mb-1">$400</h3>
-            <p className="text-white/90">Total Donated</p>
-            <p className="text-xs text-white/70 mt-2">Last 12 months</p>
+    <DottedGlowBackground className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      <div className="py-12 md:py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Welcome banner */}
+          <div className="glass-card rounded-2xl p-8 mb-10 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-ada-red/5 to-emerald-500/5" />
+            <div className="relative flex items-center gap-6">
+              <img
+                src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=120&h=120&fit=crop&crop=face"
+                alt="Donor"
+                className="w-16 h-16 rounded-2xl object-cover shadow-md hidden sm:block"
+              />
+              <div>
+                <h1 className="text-3xl md:text-4xl font-bold text-ada-near-black mb-1">
+                  Thank you, {user?.name.split(' ')[0]}!
+                </h1>
+                <p className="text-ada-muted-gray text-lg">Your generosity is making a real difference</p>
+              </div>
+            </div>
           </div>
 
-          <div className="bg-gradient-to-br from-green-500 to-green-600 text-white p-6 rounded-xl">
-            <div className="text-3xl mb-2">🔬</div>
-            <h3 className="text-3xl font-bold mb-1">2</h3>
-            <p className="text-white/90">Research Projects Funded</p>
-            <p className="text-xs text-white/70 mt-2">Through your contributions</p>
+          {/* Impact Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-12">
+            <div className="rounded-2xl p-6 bg-gradient-to-br from-ada-red to-ada-red-bright text-white shadow-lg shadow-ada-red/20">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-medium text-white/80">Total Donated</span>
+                <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">💝</div>
+              </div>
+              <h3 className="text-3xl font-bold mb-0.5">$400</h3>
+              <p className="text-white/70 text-sm">Last 12 months</p>
+            </div>
+
+            <div className="rounded-2xl p-6 bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/20">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-medium text-white/80">Research Funded</span>
+                <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">🔬</div>
+              </div>
+              <h3 className="text-3xl font-bold mb-0.5">2</h3>
+              <p className="text-white/70 text-sm">Projects supported</p>
+            </div>
+
+            <div className="rounded-2xl p-6 bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/20">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-medium text-white/80">People Helped</span>
+                <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">👥</div>
+              </div>
+              <h3 className="text-3xl font-bold mb-0.5">150+</h3>
+              <p className="text-white/70 text-sm">Through your contributions</p>
+            </div>
           </div>
 
-          <div className="bg-gradient-to-br from-blue-500 to-blue-600 text-white p-6 rounded-xl">
-            <div className="text-3xl mb-2">👥</div>
-            <h3 className="text-3xl font-bold mb-1">150+</h3>
-            <p className="text-white/90">People Helped</p>
-            <p className="text-xs text-white/70 mt-2">Educational programs supported</p>
-          </div>
-        </div>
-
-        {/* Donation History */}
-        <div className="mb-12">
-          <h2 className="text-2xl font-bold text-ada-navy mb-6">Your Recent Donations</h2>
-          <div className="bg-white rounded-xl border border-ada-border overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-ada-light">
-                <tr>
-                  <th className="px-6 py-3 text-left text-sm font-medium text-ada-navy">Date</th>
-                  <th className="px-6 py-3 text-left text-sm font-medium text-ada-navy">Campaign</th>
-                  <th className="px-6 py-3 text-right text-sm font-medium text-ada-navy">Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {donations.map((donation, index) => (
-                  <tr key={index} className="border-t border-ada-border">
-                    <td className="px-6 py-4 text-sm text-ada-gray">{donation.date}</td>
-                    <td className="px-6 py-4 text-sm text-ada-navy">{donation.campaign}</td>
-                    <td className="px-6 py-4 text-sm text-ada-navy text-right font-medium">
-                      ${donation.amount}
-                    </td>
+          {/* Donation History */}
+          <div className="mb-12">
+            <h2 className="text-2xl font-bold text-ada-near-black mb-6">Recent Donations</h2>
+            <div className="glass-card rounded-2xl overflow-hidden">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-100">
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-ada-dark-gray">Date</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-ada-dark-gray">Campaign</th>
+                    <th className="px-6 py-4 text-right text-sm font-semibold text-ada-dark-gray">Amount</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Call to Action */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-gradient-to-r from-ada-navy to-ada-blue text-white p-8 rounded-xl">
-            <h3 className="text-2xl font-bold mb-4">💚 Make Another Donation</h3>
-            <p className="mb-6 text-white/90">
-              Continue your impact by supporting our ongoing research and education programs.
-            </p>
-            <button className="px-6 py-3 bg-white text-ada-navy rounded-lg hover:bg-white/90 transition-colors font-medium">
-              Donate Now
-            </button>
+                </thead>
+                <tbody>
+                  {donations.map((donation, index) => (
+                    <tr key={index} className="border-b border-gray-50 last:border-0">
+                      <td className="px-6 py-4 text-sm text-ada-muted-gray">{donation.date}</td>
+                      <td className="px-6 py-4 text-sm text-ada-dark-gray font-medium">{donation.campaign}</td>
+                      <td className="px-6 py-4 text-sm text-ada-near-black text-right font-bold">${donation.amount}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
 
-          <div className="bg-gradient-to-r from-purple-600 to-purple-700 text-white p-8 rounded-xl">
-            <h3 className="text-2xl font-bold mb-4">🎁 Create a Legacy</h3>
-            <p className="mb-6 text-white/90">
-              Learn about planned giving and how you can create a lasting impact.
-            </p>
-            <button className="px-6 py-3 bg-white text-purple-700 rounded-lg hover:bg-white/90 transition-colors font-medium">
-              Learn More
-            </button>
+          {/* CTAs */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="rounded-2xl p-8 bg-gradient-to-br from-ada-near-black to-ada-near-black/90 text-white relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-ada-red/10 to-transparent" />
+              <div className="relative">
+                <h3 className="text-xl font-bold mb-3">Make Another Donation</h3>
+                <p className="mb-5 text-white/70 text-sm">Continue your impact by supporting ongoing research.</p>
+                <button className="px-5 py-2.5 bg-white text-ada-near-black rounded-xl font-medium text-sm hover:shadow-lg transition-all">
+                  Donate Now
+                </button>
+              </div>
+            </div>
+
+            <div className="rounded-2xl p-8 bg-gradient-to-br from-violet-600 to-violet-700 text-white relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent" />
+              <div className="relative">
+                <h3 className="text-xl font-bold mb-3">Create a Legacy</h3>
+                <p className="mb-5 text-white/70 text-sm">Learn about planned giving and lasting impact.</p>
+                <button className="px-5 py-2.5 bg-white text-violet-700 rounded-xl font-medium text-sm hover:shadow-lg transition-all">
+                  Learn More
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </DottedGlowBackground>
   );
 }

@@ -1,76 +1,69 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useAuthStore } from '@store/authStore';
+import { unauthFlow, authFlow } from '@data/chatFlows';
 
 interface Message {
   id: string;
   text: string;
   sender: 'user' | 'agent';
-  timestamp: Date;
+  suggestions?: string[];
 }
 
 export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      text: 'Hi! I\'m your ADA Help assistant. How can I help you today?',
-      sender: 'agent',
-      timestamp: new Date(),
-    },
-  ]);
-  const [inputValue, setInputValue] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const { user } = useAuthStore();
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [flowStep, setFlowStep] = useState(0);
+  const [isTyping, setIsTyping] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { isAuthenticated, user } = useAuthStore();
 
-  const handleSend = async () => {
-    if (!inputValue.trim() || isLoading) return;
+  const flow = isAuthenticated ? authFlow : unauthFlow;
 
-    const newUserMessage: Message = {
-      id: Date.now().toString(),
-      text: inputValue,
-      sender: 'user',
-      timestamp: new Date(),
-    };
-
-    setMessages((prev) => [...prev, newUserMessage]);
-    const userQuery = inputValue;
-    setInputValue('');
-    setIsLoading(true);
-
-    try {
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userQuery }),
-      });
-
-      const data = await res.json();
-      const agentText = res.ok
-        ? data.text
-        : 'I apologize, I had trouble processing that. Could you try rephrasing?';
-
-      const agentMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        text: agentText,
-        sender: 'agent',
-        timestamp: new Date(),
-      };
-
-      setMessages((prev) => [...prev, agentMessage]);
-    } catch (error) {
-      console.error('Chat error:', error);
-
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        text: 'I apologize, but I\'m having trouble connecting right now. Please try again in a moment or contact our support team for immediate assistance.',
-        sender: 'agent',
-        timestamp: new Date(),
-      };
-
-      setMessages((prev) => [...prev, errorMessage]);
-    } finally {
-      setIsLoading(false);
+  useEffect(() => {
+    if (isOpen && messages.length === 0) {
+      simulateAgentMessage(0);
     }
+  }, [isOpen]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, isTyping]);
+
+  const simulateAgentMessage = (stepIndex: number) => {
+    if (stepIndex >= flow.length) return;
+
+    setIsTyping(true);
+    setTimeout(() => {
+      const step = flow[stepIndex];
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `agent-${Date.now()}`,
+          text: step.agent,
+          sender: 'agent',
+          suggestions: step.suggestions,
+        },
+      ]);
+      setIsTyping(false);
+      setFlowStep(stepIndex + 1);
+    }, 800 + Math.random() * 600);
+  };
+
+  const handleUserInput = (text: string) => {
+    setMessages((prev) => {
+      const updated = prev.map((m) => ({ ...m, suggestions: undefined }));
+      return [
+        ...updated,
+        { id: `user-${Date.now()}`, text, sender: 'user' as const },
+      ];
+    });
+    simulateAgentMessage(flowStep);
+  };
+
+  const handleReset = () => {
+    setMessages([]);
+    setFlowStep(0);
+    simulateAgentMessage(0);
   };
 
   return (
@@ -94,83 +87,91 @@ export default function ChatWidget() {
 
       {/* Chat window */}
       {isOpen && (
-        <div className="fixed bottom-24 right-6 w-[360px] h-[480px] glass-card rounded-2xl shadow-2xl flex flex-col z-50 overflow-hidden">
+        <div className="fixed bottom-24 right-6 w-[380px] h-[520px] rounded-2xl shadow-2xl flex flex-col z-50 overflow-hidden border border-white/20 bg-white/95 backdrop-blur-xl">
           {/* Header */}
-          <div className="bg-gradient-to-r from-ada-red to-ada-red-bright text-white px-5 py-4">
+          <div className="bg-gradient-to-r from-ada-red to-ada-red-bright text-white px-5 py-4 flex-shrink-0">
             <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-bold text-base">ADA Help Assistant</h3>
-                <p className="text-xs text-white/80">
-                  {user ? `Hi ${user.name.split(' ')[0]}!` : 'How can we help?'}
-                </p>
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="font-bold text-sm">ADA Help Assistant</h3>
+                  <p className="text-[11px] text-white/70">
+                    {user ? `Personalized for ${user.name.split(' ')[0]}` : 'Always here to help'}
+                  </p>
+                </div>
               </div>
               <button
                 onClick={() => setIsOpen(false)}
                 className="w-8 h-8 rounded-lg hover:bg-white/20 flex items-center justify-center transition-colors"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
             </div>
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gradient-to-b from-gray-50/50 to-white/50">
+          <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
             {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                <div className={`max-w-[80%] rounded-xl px-3.5 py-2.5 ${
-                  message.sender === 'user'
-                    ? 'bg-gradient-to-r from-ada-red to-ada-red-bright text-white'
-                    : 'bg-white text-ada-dark-gray shadow-sm border border-gray-100'
-                }`}>
-                  <p className="text-sm leading-relaxed">{message.text}</p>
-                  <span className="text-[10px] opacity-60 mt-1 block">
-                    {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </span>
+              <div key={message.id}>
+                <div className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 ${
+                    message.sender === 'user'
+                      ? 'bg-gradient-to-r from-ada-red to-ada-red-bright text-white rounded-br-md'
+                      : 'bg-gray-100 text-ada-dark-gray rounded-bl-md'
+                  }`}>
+                    <p className="text-[13px] leading-relaxed whitespace-pre-wrap">{message.text}</p>
+                  </div>
                 </div>
+                {/* Suggestion chips */}
+                {message.suggestions && message.suggestions.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-2 ml-1">
+                    {message.suggestions.map((suggestion) => (
+                      <button
+                        key={suggestion}
+                        onClick={() => handleUserInput(suggestion)}
+                        className="px-3 py-1.5 text-[12px] font-medium text-ada-red bg-ada-red/5 border border-ada-red/20 rounded-full hover:bg-ada-red/10 hover:border-ada-red/40 transition-all"
+                      >
+                        {suggestion}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
-            {isLoading && (
+            {isTyping && (
               <div className="flex justify-start">
-                <div className="bg-white rounded-xl px-3.5 py-2.5 shadow-sm border border-gray-100">
+                <div className="bg-gray-100 rounded-2xl rounded-bl-md px-4 py-3">
                   <div className="flex items-center gap-1.5">
-                    <div className="w-1.5 h-1.5 bg-ada-red/50 rounded-full animate-bounce" />
-                    <div className="w-1.5 h-1.5 bg-ada-red/50 rounded-full animate-bounce [animation-delay:0.1s]" />
-                    <div className="w-1.5 h-1.5 bg-ada-red/50 rounded-full animate-bounce [animation-delay:0.2s]" />
+                    <div className="w-1.5 h-1.5 bg-ada-muted-gray rounded-full animate-bounce" />
+                    <div className="w-1.5 h-1.5 bg-ada-muted-gray rounded-full animate-bounce [animation-delay:0.15s]" />
+                    <div className="w-1.5 h-1.5 bg-ada-muted-gray rounded-full animate-bounce [animation-delay:0.3s]" />
                   </div>
                 </div>
               </div>
             )}
+            <div ref={messagesEndRef} />
           </div>
 
-          {/* Input */}
-          <div className="p-3 border-t border-gray-100 bg-white/80">
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                placeholder="Type your message..."
-                className="flex-1 px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-ada-red/20 focus:border-ada-red/30 text-sm transition-all"
-              />
+          {/* Footer */}
+          <div className="px-4 py-3 border-t border-gray-100 bg-white flex-shrink-0">
+            {flowStep >= flow.length ? (
               <button
-                onClick={handleSend}
-                disabled={isLoading}
-                className="w-10 h-10 bg-gradient-to-r from-ada-red to-ada-red-bright text-white rounded-xl hover:shadow-md hover:shadow-ada-red/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center flex-shrink-0"
+                onClick={handleReset}
+                className="w-full py-2.5 text-sm font-medium text-ada-red bg-ada-red/5 border border-ada-red/20 rounded-xl hover:bg-ada-red/10 transition-all"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                </svg>
+                Start a new conversation
               </button>
-            </div>
-            <p className="text-[10px] text-ada-muted-gray text-center mt-2">
-              This conversation helps us personalize your experience
-            </p>
+            ) : (
+              <p className="text-[11px] text-ada-muted-gray text-center">
+                Select a suggestion above or tap to continue
+              </p>
+            )}
           </div>
         </div>
       )}
