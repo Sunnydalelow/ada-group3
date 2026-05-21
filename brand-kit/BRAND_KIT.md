@@ -60,6 +60,21 @@
 - **Primary color:** ADA Red (`#A6192E`)
 - **Usage:** Always use on white or very light backgrounds; do not recolor or distort
 
+### Logo Files
+
+| File | Use Case |
+|------|----------|
+| `brand-kit/logos/ada-logo-full-color.svg` | Primary logo — use on white/light backgrounds |
+| `brand-kit/logos/ada-logo-white.svg` | Reversed logo — use on dark/colored backgrounds |
+| `public/ada-logo.svg` | Web app header logo (same as full-color) |
+
+### Logo Guidelines
+
+- **Clear space:** Maintain minimum padding equal to the height of the "A" in "Association"
+- **Minimum size:** Do not display smaller than 120px wide on web
+- **Don't:** Stretch, rotate, add effects, change colors, or place on busy backgrounds
+- **Dark backgrounds:** Use the white (`ada-logo-white.svg`) version only
+
 ---
 
 ## Voice & Tone
